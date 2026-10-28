@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Бал костюмов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Onest:wght@400;500;600&family=Unbounded:wght@700;800&display=swap">
+<style>
+:root {
+  --bg: #ecebf3; --surface: #f8f7fb; --ink: #231a33; --muted: #655c75; --line: #cdc8da;
+  --accent: #c53c08; --on-accent: #ffffff; --violet: #5b3a91; --good: #2b7a4b;
+  --f-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --f-body: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #150f1d; --surface: #211829; --ink: #efe9f7; --muted: #a89fb8; --line: #3b2e4c;
+    --accent: #ff8a4c; --on-accent: #1a0f08; --violet: #b99af0; --good: #6fd09a;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.5;
+  padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+[hidden] { display: none !important; }
+.wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+header { display: flex; flex-direction: column; gap: 10px; }
+h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(1.9rem, 7vw, 2.9rem); line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+.sub { color: var(--muted); margin: 0; }
+.pill { align-self: flex-start; font-family: var(--f-mono); font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; padding: 4px 10px; border-radius: 999px; border: 1px solid currentColor; }
+.pill.voting { color: var(--accent); }
+.pill.closed { color: var(--muted); }
+.pill.revealed { color: var(--violet); }
+nav { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+nav button { font: inherit; font-weight: 600; background: none; border: 0; color: var(--muted); padding: 10px 14px; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+nav button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid var(--violet); outline-offset: 2px; }
+.slip { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.slip > section { padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.slip > section + section { border-top: 2px dashed var(--line); }
+h2 { font-family: var(--f-display); font-weight: 700; font-size: 1rem; margin: 0; text-wrap: balance; }
+.hint { color: var(--muted); font-size: .9rem; margin: 0; }
+.pick { display: grid; grid-template-columns: 68px minmax(0, 1fr); gap: 12px; align-items: center; }
+.pts { text-align: center; font-family: var(--f-mono); line-height: 1; }
+.pts b { display: block; font-size: 2.1rem; color: var(--accent); font-weight: 600; }
+.pts span { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.nom, .field { display: flex; flex-direction: column; gap: 6px; }
+.nom label, .field label { font-weight: 600; font-size: .95rem; }
+.nom small { color: var(--muted); font-weight: 400; }
+select, input[type="text"], input[type="password"], textarea {
+  width: 100%; min-width: 0; font: inherit; font-size: 16px; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px;
+}
+textarea { min-height: 120px; resize: vertical; }
+select:disabled, input:disabled { opacity: .55; }
+.btn { font: inherit; font-weight: 600; background: var(--accent); color: var(--on-accent); border: 0; border-radius: 4px; padding: 11px 18px; cursor: pointer; }
+.btn.ghost { background: none; color: var(--ink); border: 1px solid var(--line); }
+.btn.small { padding: 6px 10px; font-size: .85rem; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.msg { margin: 0; font-size: .92rem; min-height: 1.3em; }
+.msg.err { color: var(--accent); }
+.msg.ok { color: var(--good); }
+.note { border: 1px solid var(--line); border-left: 4px solid var(--violet); background: var(--surface); padding: 10px 14px; border-radius: 4px; margin: 0; }
+.empty { color: var(--muted); padding: 22px 4px; margin: 0; }
+.people { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.people li { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--line); }
+.people li:first-child { border-top: 0; }
+.people .who { min-width: 0; overflow-wrap: anywhere; }
+.people .who strong { display: block; }
+.people .who span { color: var(--muted); font-size: .92rem; }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 10px 8px; border-top: 1px solid var(--line); vertical-align: top; }
+thead th { border-top: 0; font-size: .75rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+td.num, th.num { text-align: right; font-family: var(--f-mono); white-space: nowrap; }
+td.place { font-family: var(--f-display); font-weight: 700; width: 2.2em; }
+tr.first td { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+tr.first td.place { color: var(--accent); }
+td .c-name { font-weight: 600; overflow-wrap: anywhere; }
+td .c-sub { color: var(--muted); font-size: .88rem; overflow-wrap: anywhere; }
+.noms { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.nomcard { border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; background: var(--bg); }
+.nomcard .t { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.nomcard .w { font-weight: 600; overflow-wrap: anywhere; }
+.nomcard .v { font-family: var(--f-mono); font-size: .85rem; color: var(--violet); }
+details { border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; background: var(--surface); }
+summary { cursor: pointer; font-weight: 600; }
+details ul { margin: 10px 0 2px; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span id="status-pill" class="pill closed">Загрузка</span>
+    <h1>Бал костюмов</h1>
+    <p class="sub">Голосование гостей за лучшие костюмы вечера.</p>
+  </header>
+  <nav id="tabs" aria-label="Разделы"></nav>
+  <div id="notice"></div>
+
+  <div id="view-ballot">
+    <div class="slip" id="ballot-slip">
+      <section>
+        <h2>Кто вы</h2>
+        <div class="field"><label for="in-name">Ваше имя</label><input id="in-name" type="text" maxlength="60" autocomplete="off"></div>
+        <div class="field"><label for="in-own">Ваш костюм в списке, если вы участвуете</label><select id="in-own"></select></div>
+      </section>
+      <div id="ballot-fields"></div>
+      <section>
+        <div class="row">
+          <button id="btn-vote" class="btn" type="button">Отправить бюллетень</button>
+          <p id="vote-msg" class="msg" role="status"></p>
+        </div>
+      </section>
+    </div>
+    <p id="ballot-empty" class="empty" hidden>Список костюмов пока пуст. Загляните чуть позже.</p>
+  </div>
+
+  <div id="view-results" hidden><div id="results"></div></div>
+
+  <div id="view-host" hidden>
+    <div class="slip" id="host-login">
+      <section>
+        <h2>Вход для ведущей</h2>
+        <div class="field"><label for="host-pin">PIN</label><input id="host-pin" type="password" autocomplete="off"></div>
+        <div class="row"><button id="btn-login" class="btn" type="button">Войти</button><p id="login-msg" class="msg"></p></div>
+      </section>
+    </div>
+    <div class="slip" id="host-panel" hidden>
+      <section>
+        <h2>Стадия голосования</h2>
+        <p class="hint">Гости видят итоги только после кнопки «Показать итоги». Вы видите их всегда на вкладке «Итоги».</p>
+        <div id="stage-btns" class="row"></div>
+        <p id="stage-msg" class="msg"></p>
+      </section>
+      <section>
+        <h2>Добавить костюмы</h2>
+        <p class="hint">По одному на строке в виде «Имя — Костюм».</p>
+        <textarea id="bulk" placeholder="Аня — Вампир-бухгалтер&#10;Игорь — Привидение с ноутбуком"></textarea>
+        <div class="row"><button id="btn-bulk" class="btn" type="button">Добавить</button><p id="bulk-msg" class="msg"></p></div>
+      </section>
+      <section>
+        <h2>Участники</h2>
+        <div id="host-list"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* Вставьте сюда адрес веб-приложения Apps Script (см. README.md). */
+  var API_URL = "https://script.google.com/macros/s/AKfycbyU3RFFQvt5xu_4w6JLZvxNVYSiW-XZN2G6QhIubD4DK_I-SUDa3q9zNvApKMjz-pWo/exec";
+
+  var NOMS = [
+    { key: "scary", title: "Самый страшный", hint: "от него мурашки" },
+    { key: "funny", title: "Самый смешной", hint: "смеялись громче всех" },
+    { key: "idea", title: "Самая оригинальная идея", hint: "такого мы ещё не видели" },
+    { key: "diy", title: "Сделано своими руками", hint: "ручная работа, а не из магазина" }
+  ];
+  var configured = API_URL.indexOf("https://") === 0;
+  function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {} return null; }
+  function ss(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} return null; }
+  var token = ls("cb-token");
+  if (!token) { token = "g" + Math.random().toString(36).slice(2) + Date.now().toString(36); ls("cb-token", token); }
+
+  var S = { status: "voting", costumes: [], ballots: 0, results: null, loaded: false, offline: false };
+  var pin = ss("cb-pin") || "";
+  var isHost = false, hostAsked = location.hash === "#host";
+  var tab = hostAsked ? "host" : "ballot";
+  var draft = { top: ["", "", ""], noms: {} }, touched = false, hasMine = false;
+  var confirmKey = null;
+  var lastCostumesKey = "";
+
+  function h(tag, props) {
+    var e = document.createElement(tag), p = props || {};
+    Object.keys(p).forEach(function (k) {
+      var v = p[k];
+      if (k === "class") e.className = v;
+      else if (k.indexOf("on") === 0) e.addEventListener(k.slice(2), v);
+      else if (v === true) e.setAttribute(k, "");
+      else if (v !== false && v != null) e.setAttribute(k, v);
+    });
+    for (var i = 2; i < arguments.length; i++) {
+      [].concat(arguments[i]).forEach(function (c) { if (c == null || c === false) return; e.append(c.nodeType ? c : document.createTextNode(String(c))); });
+    }
+    return e;
+  }
+  function $(id) { return document.getElementById(id); }
+  function pl(n, f) { var m = n % 100, d = n % 10; if (m > 10 && m < 20) return f[2]; if (d === 1) return f[0]; if (d > 1 && d < 5) return f[1]; return f[2]; }
+  function label(c) { return c.name + " — " + c.costume; }
+  function setMsg(el, text, cls) { el.className = "msg" + (cls ? " " + cls : ""); el.textContent = text; }
+
+  function api(body) {
+    return fetch(API_URL, { method: "POST", body: JSON.stringify(body) }).then(function (r) { return r.json(); });
+  }
+  function getState() {
+    if (isHost) return api({ action: "admin", pin: pin, op: "state" }).then(function (r) { if (!r.ok) throw new Error(r.error); return r.state; });
+    return fetch(API_URL + "?action=state").then(function (r) { return r.json(); }).then(function (r) { if (!r.ok) throw new Error("state"); return r.state; });
+  }
+
+  /* ---------- шапка, вкладки ---------- */
+  function renderStatus() {
+    var pill = $("status-pill");
+    var txt = { voting: "Голосование открыто", closed: "Голосование закрыто", revealed: "Итоги объявлены" }[S.status];
+    pill.textContent = S.loaded ? txt : (S.offline ? "Нет связи" : "Загрузка");
+    pill.className = "pill " + (S.loaded ? S.status : "closed");
+  }
+  function renderTabs() {
+    var items = [["ballot", "Бюллетень"], ["results", "Итоги"]];
+    if (hostAsked) items.push(["host", "Ведущая"]);
+    var nav = $("tabs");
+    nav.replaceChildren.apply(nav, items.map(function (it) {
+      return h("button", { type: "button", "aria-pressed": String(tab === it[0]), onclick: function () { tab = it[0]; renderAll(); } }, it[1]);
+    }));
+    ["ballot", "results", "host"].forEach(function (k) { $("view-" + k).hidden = tab !== k; });
+  }
+  function renderNotice() {
+    var box = $("notice"), msgs = [];
+    if (!configured) msgs.push("Страница ещё не подключена к таблице: вставьте адрес веб-приложения в index.html (см. README).");
+    else if (S.offline && !S.loaded) msgs.push("Не удалось связаться с таблицей. Проверьте интернет и обновите страницу.");
+    box.replaceChildren.apply(box, msgs.map(function (m) { return h("p", { class: "note" }, m); }));
+  }
+
+  /* ---------- бюллетень ---------- */
+  function ownId() { return $("in-own").value; }
+  function renderOwnSelect() {
+    var sel = $("in-own"), cur = sel.value || ls("cb-own") || "";
+    sel.replaceChildren.apply(sel, [h("option", { value: "" }, "— я без костюма / не участвую —")].concat(S.costumes.map(function (c) { return h("option", { value: c.id }, label(c)); })));
+    sel.value = S.costumes.some(function (c) { return c.id === cur; }) ? cur : "";
+  }
+  function select(id, eligible, value, taken, disabled, onChange) {
+    var s = h("select", { id: id, disabled: disabled });
+    s.append(h("option", { value: "" }, "— не выбрано —"));
+    eligible.forEach(function (c) {
+      var o = h("option", { value: c.id, disabled: taken.indexOf(c.id) >= 0 && c.id !== value }, label(c));
+      if (c.id === value) o.selected = true;
+      s.append(o);
+    });
+    s.addEventListener("change", function () { onChange(s.value); });
+    return s;
+  }
+  function renderBallot() {
+    var empty = !S.costumes.length;
+    $("ballot-slip").hidden = empty; $("ballot-empty").hidden = !empty;
+    if (empty) return;
+    var own = ownId();
+    var eligible = S.costumes.filter(function (c) { return c.id !== own; });
+    var ids = {}; eligible.forEach(function (c) { ids[c.id] = true; });
+    draft.top = draft.top.map(function (v) { return ids[v] ? v : ""; });
+    NOMS.forEach(function (n) { if (draft.noms[n.key] && !ids[draft.noms[n.key]]) draft.noms[n.key] = ""; });
+    var locked = S.status !== "voting" || !configured;
+    var top = h("section", {},
+      h("h2", {}, "Лучший костюм вечера"),
+      h("p", { class: "hint" }, "Выберите три костюма. Первое место даёт 3 балла, второе 2, третье 1."),
+      [3, 2, 1].map(function (p, i) {
+        var taken = draft.top.filter(function (v, j) { return j !== i && v; });
+        return h("div", { class: "pick" },
+          h("div", { class: "pts" }, h("b", {}, p), h("span", {}, pl(p, ["балл", "балла", "баллов"]))),
+          select("top-" + i, eligible, draft.top[i], taken, locked, function (v) { draft.top[i] = v; touched = true; setMsg($("vote-msg"), ""); renderBallot(); }));
+      }));
+    var noms = h("section", {},
+      h("h2", {}, "Номинации"),
+      h("p", { class: "hint" }, "В каждой номинации один голос. Можно пропустить любую."),
+      NOMS.map(function (n) {
+        return h("div", { class: "nom" },
+          h("label", { for: "nom-" + n.key }, n.title + " ", h("small", {}, "· " + n.hint)),
+          select("nom-" + n.key, eligible, draft.noms[n.key] || "", [], locked, function (v) { draft.noms[n.key] = v; touched = true; setMsg($("vote-msg"), ""); renderBallot(); }));
+      }));
+    var box = $("ballot-fields");
+    box.replaceChildren(top, noms);
+    $("btn-vote").disabled = locked;
+    $("btn-vote").textContent = hasMine ? "Обновить бюллетень" : "Отправить бюллетень";
+    $("in-name").disabled = locked; $("in-own").disabled = locked;
+    if (S.status !== "voting" && S.loaded) setMsg($("vote-msg"), "Голосование закрыто, бюллетени больше не принимаются.");
+  }
+  function submitVote() {
+    var name = $("in-name").value.trim(), msg = $("vote-msg");
+    var top = draft.top.filter(Boolean), noms = {};
+    NOMS.forEach(function (n) { if (draft.noms[n.key]) noms[n.key] = draft.noms[n.key]; });
+    if (!name) { setMsg(msg, "Напишите своё имя.", "err"); return; }
+    if (!top.length) { setMsg(msg, "Выберите хотя бы один костюм на первое место.", "err"); return; }
+    ls("cb-name", name); ls("cb-own", ownId());
+    setMsg(msg, "Отправляю…");
+    $("btn-vote").disabled = true;
+    api({ action: "vote", token: token, name: name, own: ownId(), top: top, noms: noms }).then(function (r) {
+      if (r.ok) { hasMine = true; touched = false; setMsg(msg, "Бюллетень принят. Его можно изменить, пока голосование открыто.", "ok"); }
+      else setMsg(msg, r.error === "closed" ? "Голосование уже закрыто." : "Бюллетень не принят. Обновите страницу и попробуйте ещё раз.", "err");
+    }).catch(function () { setMsg(msg, "Нет связи, попробуйте ещё раз.", "err"); })
+      .then(function () { renderBallot(); });
+  }
+
+  /* ---------- итоги ---------- */
+  function renderResults() {
+    var box = $("results"), t = S.results;
+    var rules = h("details", {}, h("summary", {}, "Как считаем"), h("ul", {},
+      h("li", {}, "Лучший костюм: каждый называет три костюма. Первое место даёт 3 балла, второе 2, третье 1."),
+      h("li", {}, "Голоса за собственный костюм не считаются."),
+      h("li", {}, "Побеждает костюм с наибольшей суммой баллов. При равенстве выше тот, у кого больше первых мест, затем больше упоминаний в бюллетенях. Если и это равно, место делят."),
+      h("li", {}, "В номинациях один голос на гостя. Побеждает набравший больше всех, при равенстве награждают всех."),
+      h("li", {}, "Свой выбор можно менять, пока голосование открыто.")));
+    var count = h("p", { class: "hint" }, "Бюллетеней: " + S.ballots + ".");
+    if (!t) {
+      box.replaceChildren(h("div", { class: "slip" }, h("section", {}, h("h2", {}, "Итоги"), count, h("p", { class: "empty" }, "Итоги появятся, когда ведущая откроет их."))), rules);
+      return;
+    }
+    var preview = S.status !== "revealed" ? h("p", { class: "note" }, "Предпросмотр. Гости пока не видят итоги.") : null;
+    if (!t.counted) {
+      box.replaceChildren(preview, h("div", { class: "slip" }, h("section", {}, h("h2", {}, "Итоги"), count, h("p", { class: "empty" }, "Пока нет ни одного бюллетеня."))), rules);
+      return;
+    }
+    var table = h("div", { class: "tablewrap" }, h("table", {},
+      h("thead", {}, h("tr", {}, h("th", {}, "№"), h("th", {}, "Костюм"), h("th", { class: "num" }, "1м"), h("th", { class: "num" }, "2м"), h("th", { class: "num" }, "3м"), h("th", { class: "num" }, "Баллы"))),
+      h("tbody", {}, t.rows.map(function (r) {
+        return h("tr", { class: r.place === 1 ? "first" : "" },
+          h("td", { class: "place" }, r.place),
+          h("td", {}, h("div", { class: "c-name" }, r.costume), h("div", { class: "c-sub" }, r.name + (r.shared ? " · делит место" : ""))),
+          h("td", { class: "num" }, r.p1), h("td", { class: "num" }, r.p2), h("td", { class: "num" }, r.p3), h("td", { class: "num" }, r.pts));
+      }))));
+    var nomsEl = h("div", { class: "noms" }, t.winners.map(function (w) {
+      var nom = NOMS.filter(function (n) { return n.key === w.key; })[0];
+      return h("div", { class: "nomcard" }, h("div", { class: "t" }, nom.title),
+        w.winners.length ? w.winners.map(function (r) { return h("div", { class: "w" }, r.costume + " · " + r.name); }) : h("div", { class: "hint" }, "Голосов нет"),
+        w.winners.length ? h("div", { class: "v" }, w.max + " " + pl(w.max, ["голос", "голоса", "голосов"])) : null);
+    }));
+    box.replaceChildren(preview, h("div", { class: "slip" },
+      h("section", {}, h("h2", {}, "Лучший костюм вечера"), count, table),
+      h("section", {}, h("h2", {}, "Номинации"), nomsEl)), rules);
+  }
+
+  /* ---------- ведущая ---------- */
+  function hostCall(body) { return api(Object.assign({ action: "admin", pin: pin }, body)); }
+  function applyHostResult(r, msgEl, okText) {
+    if (!r.ok) { setMsg(msgEl, r.error === "bad_pin" ? "Неверный PIN." : "Не получилось сохранить.", "err"); return false; }
+    applyState(r.state); setMsg(msgEl, okText, "ok"); return true;
+  }
+  function renderHost() {
+    $("host-login").hidden = isHost; $("host-panel").hidden = !isHost;
+    if (!isHost) return;
+    var stages = [["voting", "Открыть голосование"], ["closed", "Закрыть голосование"], ["revealed", "Показать итоги"]];
+    var sb = $("stage-btns");
+    sb.replaceChildren.apply(sb, stages.map(function (s) {
+      return h("button", { class: "btn" + (S.status === s[0] ? "" : " ghost"), type: "button", disabled: S.status === s[0], onclick: function () {
+        setMsg($("stage-msg"), "Сохраняю…");
+        hostCall({ op: "setStatus", status: s[0] }).then(function (r) { applyHostResult(r, $("stage-msg"), "Готово."); }).catch(function () { setMsg($("stage-msg"), "Нет связи.", "err"); });
+      } }, s[1]);
+    }));
+    var list = $("host-list");
+    if (!S.costumes.length) { list.replaceChildren(h("p", { class: "hint" }, "Костюмов пока нет.")); return; }
+    list.replaceChildren(h("ul", { class: "people" }, S.costumes.map(function (c) {
+      var key = "c:" + c.id;
+      return h("li", {}, h("div", { class: "who" }, h("strong", {}, c.costume), h("span", {}, c.name)),
+        h("button", { class: "btn ghost small", type: "button", onclick: function () {
+          if (confirmKey !== key) { confirmKey = key; renderHost(); return; }
+          confirmKey = null;
+          hostCall({ op: "deleteCostume", id: c.id }).then(function (r) { if (r.ok) applyState(r.state); });
+        } }, confirmKey === key ? "Точно удалить?" : "Удалить"));
+    })));
+  }
+  function login() {
+    var v = $("host-pin").value;
+    setMsg($("login-msg"), "Проверяю…");
+    api({ action: "admin", pin: v, op: "state" }).then(function (r) {
+      if (!r.ok) { setMsg($("login-msg"), "Неверный PIN.", "err"); return; }
+      pin = v; ss("cb-pin", v); isHost = true; applyState(r.state); setMsg($("login-msg"), "");
+    }).catch(function () { setMsg($("login-msg"), "Нет связи.", "err"); });
+  }
+  function addBulk() {
+    var lines = $("bulk").value.split("\n").map(function (s) { return s.trim(); }).filter(Boolean);
+    var items = [], bad = 0;
+    lines.forEach(function (l) {
+      var m = l.split(/\s+[—–-]\s+|\t/);
+      if (m.length >= 2 && m[0].trim() && m.slice(1).join(" — ").trim()) items.push({ name: m[0].trim(), costume: m.slice(1).join(" — ").trim() });
+      else bad++;
+    });
+    var msg = $("bulk-msg");
+    if (!items.length) { setMsg(msg, "Не нашла ни одной строки вида «Имя — Костюм».", "err"); return; }
+    setMsg(msg, "Добавляю…");
+    hostCall({ op: "addCostumes", items: items }).then(function (r) {
+      if (applyHostResult(r, msg, "Добавлено: " + items.length + (bad ? ". Пропущено строк: " + bad + "." : "."))) $("bulk").value = "";
+    }).catch(function () { setMsg(msg, "Нет связи.", "err"); });
+  }
+
+  /* ---------- состояние ---------- */
+  function applyState(st) {
+    S.status = st.status; S.costumes = st.costumes || []; S.ballots = st.ballots || 0; S.results = st.results || null; S.loaded = true; S.offline = false;
+    var key = JSON.stringify(S.costumes);
+    if (key !== lastCostumesKey) { lastCostumesKey = key; renderOwnSelect(); }
+    renderAll();
+  }
+  function renderAll() { renderStatus(); renderTabs(); renderNotice(); renderBallot(); renderResults(); renderHost(); }
+  function refresh() {
+    if (!configured || document.hidden) return;
+    getState().then(applyState).catch(function () {
+      if (isHost) { isHost = false; ss("cb-pin", null); pin = ""; }
+      S.offline = !S.loaded; renderAll();
+    });
+  }
+
+  $("btn-vote").addEventListener("click", submitVote);
+  $("btn-login").addEventListener("click", login);
+  $("host-pin").addEventListener("keydown", function (e) { if (e.key === "Enter") login(); });
+  $("btn-bulk").addEventListener("click", addBulk);
+  $("in-own").addEventListener("change", function () { touched = true; renderBallot(); });
+  $("in-name").value = ls("cb-name") || "";
+  window.addEventListener("hashchange", function () { hostAsked = location.hash === "#host"; if (hostAsked) tab = "host"; renderAll(); });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) refresh(); });
+  renderOwnSelect(); renderAll();
+
+  if (configured) {
+    if (pin) {
+      api({ action: "admin", pin: pin, op: "state" }).then(function (r) { if (r.ok) { isHost = true; applyState(r.state); } else { pin = ""; ss("cb-pin", null); refresh(); } }).catch(refresh);
+    } else refresh();
+    fetch(API_URL + "?action=mine&token=" + encodeURIComponent(token)).then(function (r) { return r.json(); }).then(function (r) {
+      if (r.ok && r.ballot) {
+        hasMine = true;
+        if (!touched) {
+          draft = { top: (r.ballot.top || []).concat(["", "", ""]).slice(0, 3), noms: r.ballot.noms || {} };
+          if (r.ballot.name) $("in-name").value = r.ballot.name;
+          ls("cb-own", r.ballot.own || ""); renderOwnSelect(); renderBallot();
+        }
+      }
+    }).catch(function () {});
+    setInterval(refresh, 15000);
+  }
+})();
+</script>
+</body>
+</html>
